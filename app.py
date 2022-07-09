@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS  # 解决跨域的问题
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
 '''配置数据库
 app.config['SECRET_KEY'] = 'hard to guess'  # 一个字符串，密码。也可以是其他如加密过的
@@ -18,10 +19,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)  # 实例化数据库对象，它提供访问Flask-SQLAlchemy的所有功能'''
 
 
-@app.route('/test', methods=['post'])
+@app.route('/test', methods=['POST', 'GET'])
 def test():
-    data = request.get_json(silent=True)
-    print(data['aa'])  # 123
+    if request.method == 'POST':
+        print("post")
+        data = request.get_json(silent=True)
+        print(data['aa'])  # 123
+        return data['aa']
+    else:
+        print("get")
+        return "get"
+
 
 
 @app.route('/hello/<username>')
