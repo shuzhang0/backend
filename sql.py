@@ -91,7 +91,7 @@ def login(username, password):
     return -1  # user not exist
 
 
-def regist(username, password):
+def regist(username, password, role):
     cursor = con.cursor()  # initiate
     sql = "select username from user"
     cursor.execute(sql)
@@ -104,6 +104,9 @@ def regist(username, password):
             return -1
 
     sql = 'insert into user(username, password)values("%s","%s")' % (username, password)
+    cursor.execute(sql)
+    user_id = username_to_id(username)
+    sql = 'insert into user_role(user_id, role_id)values("%d","%d")' % (user_id, role)
     cursor.execute(sql)
     con.commit()  # 提交至数据库
 
@@ -126,6 +129,19 @@ def username_to_id(username):
 
     cursor.close()  # close
     return id
+
+
+def get_user_status(username):
+    cursor = con.cursor()  # initiate
+    user_id = username_to_id(username)
+    sql = "select role_id from user_role where user_id='%d'" % user_id
+    cursor.execute(sql)
+    role = cursor.fetchone()
+    user_role = role[0]
+
+    t = {'user_id': user_id, 'username': username, 'role': user_role}
+    cursor.close()  # close
+    return t
 
 
 # -------------------------BOOKS-------------------------- #
@@ -432,13 +448,29 @@ def get_order_detail(order_id):
 # -------------------------Admin-------------------------- #
 
 
-def admin_get_users(username):
+def admin_get_all_users():
     cursor = con.cursor()  # initiate
-    # user_id = username_to_id(username)
+
+    sql = "select user_id, username, nickname, password, gender, email, phone from user"
+    cursor.execute(sql)
+    user_list = cursor.fetchmany(20)  # get many record
+    t = []
+    for one_user in user_list:
+        slice = {'user_id': one_user[0], 'username': one_user[1], 'nickname': one_user[2], 'password': one_user[3],
+                 'gender': one_user[4], 'email': one_user[5], 'phone': one_user[6]}  # prepare json data
+        t.append(slice)
+
+    cursor.close()  # close
+    return t
+
+
+def admin_get_all_books():
+    cursor = con.cursor()  # initiate
+
     sql = "select book_id, name, image_url, outline, detail, press, publish_date, size, author, price" \
           " from book_info "
     cursor.execute(sql)
-    book_detail = cursor.fetchall()  # get many record
+    book_detail = cursor.fetchmany(20)  # get many record
     t = []
     for one_book in book_detail:
         slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': one_book[2], 'outline': one_book[3],
@@ -450,28 +482,24 @@ def admin_get_users(username):
     return t
 
 
+def admin_get_all_orders():
+    cursor = con.cursor()  # initiate
+
+    sql = "select order_id, user_id, payment, payment_type, status, post_fee" \
+          " from orders "
+    cursor.execute(sql)
+    order_list = cursor.fetchmany(20)  # get many record
+    t = []
+    for one_order in order_list:
+        slice = {'order_id': one_order[0], 'user_id': one_order[1], 'payment': one_order[2],
+                 'payment_type': one_order[3], 'status': one_order[4], 'post_fee': one_order[5]}  # prepare json data
+        t.append(slice)
+
+    cursor.close()  # close
+    return t
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# -------------------------THE END-------------------------- #
 
 
 if __name__ == '__main__':

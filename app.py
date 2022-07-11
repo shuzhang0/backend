@@ -1,4 +1,5 @@
 import json
+from json import JSONDecodeError
 
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -20,18 +21,23 @@ def hello(username):
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    data = json.loads(request.get_data(as_text=True))   # get json data
-    print("login...")
-    print(data)
+    try:
+        data = json.loads(request.get_data(as_text=True))  # get json data
+        print("login...")
+        print(data)
 
-    result = sql.login(data['username'], data['password'])
-    print(result)
+        result = sql.login(data['username'], data['password'])
+        print(result)
 
-    t = {
-        "status": result
-    }
-    return jsonify(t)  # -1/0/1
-
+        t = {
+            "status": result
+        }
+        return jsonify(t)  # -1/0/1
+    except JSONDecodeError as e:
+        t = {
+            "status": 400
+        }
+        return jsonify(t)
 
 
 @app.route('/regist', methods=['POST', 'GET'])
@@ -40,13 +46,30 @@ def register():
     print("register...")
     print(data)
 
-    result = sql.regist(data['username'], data['password'])
+    result = sql.regist(data['username'], data['password'], data['role'])
     print(result)
 
     t = {
         "status": result
     }
     return jsonify(t)  # -1/0
+
+
+@app.route('/login/get_user_status', methods=['POST', 'GET'])
+def user_status():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print("status getting...")
+    print(data)
+
+    the_user_status = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.get_user_status(data['username'])
+
+    the_user_status['data'] = data
+    return jsonify(the_user_status)  # -1/0
 
 
 # -------------------------BOOKS-------------------------- #
@@ -57,7 +80,7 @@ def get_books():
     data = json.loads(request.get_data(as_text=True))  # get json data
     print(data)
 
-    the_book_info = {   # prepare to send
+    the_book_info = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -74,7 +97,7 @@ def get_book_detail():
     print("book detail...")
     print(data)
 
-    the_book_info = {   # prepare to send
+    the_book_info = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -106,7 +129,7 @@ def get_book_ratings():
     print("get ratings...")
     print(data)
 
-    the_book_ratings = {   # prepare to send
+    the_book_ratings = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -126,7 +149,7 @@ def get_cart():
     print("get cart...")
     print(data)
 
-    the_cart_info = {   # prepare to send
+    the_cart_info = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -191,7 +214,7 @@ def add_orders():
     print("add order and clear user's cart...")
     print(data)
 
-    the_order_create = {   # prepare to send
+    the_order_create = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -208,7 +231,7 @@ def get_user_orders():
     print("getting user's orders...")
     print(data)
 
-    the_orders_info = {   # prepare to send
+    the_orders_info = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -225,7 +248,7 @@ def get_order_detail():
     print("getting order details...")
     print(data)
 
-    the_order_detail = {   # prepare to send
+    the_order_detail = {  # prepare to send
         'code': 200,
         'data': []
     }
@@ -241,25 +264,50 @@ def get_order_detail():
 
 @app.route('/admin/get_all_users', methods=['POST', 'GET'])
 def admin_get_users():
-    data = json.loads(request.get_data(as_text=True))  # get json data
-    print(data)
+    # data = json.loads(request.get_data(as_text=True))  # get json data
 
-    the_book_info = {   # prepare to send
+    the_user_info = {  # prepare to send
         'code': 200,
         'data': []
     }
 
-    data = sql.admin_get_users(data['username'])
+    data = sql.admin_get_all_users()
+
+    the_user_info["data"] = data
+    return jsonify(the_user_info)  # json
+
+
+@app.route('/admin/get_all_books', methods=['POST', 'GET'])
+def admin_get_books():
+    # data = json.loads(request.get_data(as_text=True))  # get json data
+
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.admin_get_all_books()
 
     the_book_info["data"] = data
     return jsonify(the_book_info)  # json
 
 
+@app.route('/admin/get_all_orders', methods=['POST', 'GET'])
+def admin_get_orders():
+    # data = json.loads(request.get_data(as_text=True))  # get json data
+
+    the_order_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.admin_get_all_orders()
+
+    the_order_info["data"] = data
+    return jsonify(the_order_info)  # json
 
 
-
-
-
+# -------------------------THE END-------------------------- #
 
 
 if __name__ == '__main__':
