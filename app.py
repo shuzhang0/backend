@@ -11,6 +11,10 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 
+@app.route('')
+def start():
+    return f'connect! success!!'
+
 @app.route('/hello/<username>')
 def hello(username):
     return f'Hello {username}!'
