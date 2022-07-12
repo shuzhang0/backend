@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 
-@app.route('')
+@app.route('/')
 def start():
     return f'connect! success!!'
 
