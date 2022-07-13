@@ -515,7 +515,7 @@ def get_books_tops():
     book_detail = cursor.fetchmany(20)  # get many record
     t = []
     for one_book in book_detail:
-        slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': one_book[2],
+        slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
                  'press': one_book[3], 'publish_date': one_book[4],
                  'author': one_book[5], 'price': one_book[6], 'category': one_book[7]}  # prepare json data
         t.append(slice)
