@@ -311,6 +311,42 @@ def admin_get_orders():
     return jsonify(the_order_info)  # json
 
 
+# -------------------------for user's taste-------------------------- #
+
+
+@app.route('/get_books_tops', methods=['POST', 'GET'])
+def get_books_tops():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print(data)
+
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.get_books_tops()
+
+    the_book_info["data"] = data
+    return jsonify(the_book_info)  # json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # -------------------------THE END-------------------------- #
 
 
