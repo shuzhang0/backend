@@ -473,9 +473,11 @@ def get_order_detail(order_id):
 def admin_get_all_users():
     cursor = con.cursor()  # initiate
 
-    sql = "select user_id, username, nickname, password, gender, email, phone from user"
+    sql = "select user.user_id, username, nickname, password, gender, email, phone, user_role.role_id " \
+          "from user inner join user_role " \
+          "on user.user_id = user_role.user_id"
     cursor.execute(sql)
-    user_list = cursor.fetchmany(20)  # get many record
+    user_list = cursor.fetchmany(50)  # get many record
     t = []
     for one_user in user_list:
         slice = {'user_id': one_user[0], 'username': one_user[1], 'nickname': one_user[2], 'password': one_user[3],
@@ -550,10 +552,11 @@ def get_books_tops():
     return t
 
 
-def get_books_for_user():
+def get_books_for_user(username):
     cursor = con.cursor()  # initiate
+    user_id = username_to_id(username)
     sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
-          " from book_info where size is not null"
+          " from xxxxx where user_id ='%d'" % (user_id)
     cursor.execute(sql)
     book_detail = cursor.fetchmany(20)  # get many record
     t = []
@@ -571,23 +574,100 @@ def get_books_for_user():
     return t
 
 
+# -------------------------Website Management-------------------------- #
 
 
+def get_orders_sum():
+    cursor = con.cursor()  # initiate
+
+    t = []
+    slice = {'month': 4, 'sum':630}  # prepare json data
+    t.append(slice)
+    slice = {'month': 5, 'sum':695}  # prepare json data
+    t.append(slice)
+    slice = {'month': 6, 'sum':675}  # prepare json data
+    t.append(slice)
+
+    cursor.close()  # close
+    return t
 
 
+# -------------------------Addition for Admin-------------------------- #
 
 
+def modify_user(username, password, nickname, gender, email, phone):
+    cursor = con.cursor()  # initiate
+    user_id = username_to_id(username)
+
+    sql = "select password, nickname, gender, email, phone from user where user_id='%d'" % (user_id)
+    cursor.execute(sql)
+    the_user = cursor.fetchone()
+    if the_user is not None:
+        sql = "update user set password='%s', nickname='%s', gender='%s', email='%s', phone='%s' " \
+              "where user_id='%d'" % (password, nickname, gender, email, phone, user_id)
+        cursor.execute(sql)
+    else:
+        return -1
+
+    con.commit()  # 提交至数据库
+    cursor.close()  # close
+    return 0
 
 
+def del_user(username):
+    cursor = con.cursor()  # initiate
+    user_id = username_to_id(username)
+    print(user_id)
+    sql = "select * from user where user_id='%d'" % (user_id)
+    cursor.execute(sql)
+    the_user = cursor.fetchone()
+    sql = "delete from user where user_id='%d'" % (user_id)
+    cursor.execute(sql)
+
+    con.commit()  # 提交至数据库
+    cursor.close()  # close
+    return 0
 
 
+# -------------------------Search for Books-------------------------- #
 
 
+def search_books(keyword, search_type):
+    cursor = con.cursor()  # initiate
+    like_key = "%" + keyword + "%"
+    print(like_key)
 
+    # 1 by name, 2 by category
+    if search_type == 1:
+        sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
+              " from book_info where name like '%s'" % (like_key)
+        cursor.execute(sql)
+        book_detail = cursor.fetchmany(20)  # get many record
+        t = []
+        for one_book in book_detail:
+            sql = "select name from book_category where cate_id='%s'" % (one_book[7])   # category id -> category name
+            cursor.execute(sql)
+            cate = cursor.fetchone()
 
+            slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
+                     'press': one_book[3], 'publish_date': one_book[4],
+                     'author': one_book[5], 'price': one_book[6], 'category': cate[0]}  # prepare json data
+            t.append(slice)
+    else:
+        sql = "select book_id, book_info.name, image_url, press, publish_date, author, price, book_category.name " \
+              "from book_info inner join book_category on book_info.book_category_id=book_category.cate_id " \
+              "where book_category.name='%s'" % (keyword)
+        cursor.execute(sql)
+        book_detail = cursor.fetchmany(20)  # get many record
+        t = []
+        for one_book in book_detail:
+            slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
+                     'press': one_book[3], 'publish_date': one_book[4],
+                     'author': one_book[5], 'price': one_book[6], 'category': one_book[7]}  # prepare json data
+            t.append(slice)
 
-
-
+    cursor.close()  # close
+    return t
 
 
 # -------------------------THE END-------------------------- #

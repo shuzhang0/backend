@@ -346,19 +346,74 @@ def get_books_for_user():
     return jsonify(the_book_info)  # json
 
 
+# -------------------------Website Management-------------------------- #
 
 
+@app.route('/admin/get_orders_sum', methods=['POST', 'GET'])
+def get_orders_sum():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print(data)
+
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.get_orders_sum()
+
+    the_book_info["data"] = data
+    return jsonify(the_book_info)  # json
 
 
+# -------------------------Addition for Admin-------------------------- #
 
 
+@app.route('/modify_user', methods=['POST', 'GET'])
+def modify_user():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print(data)
+
+    result = sql.modify_user(data['username'], data['password'], data['nickname'],
+                             data['gender'], data['email'], data['phone'])
+    print(result)
+
+    t = {
+        "status": result
+    }
+    return jsonify(t)  # 0
 
 
+@app.route('/admin/del_user', methods=['POST', 'GET'])
+def del_user():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print(data)
+
+    result = sql.del_user(data['username'])
+    print(result)
+
+    t = {
+        "status": result
+    }
+    return jsonify(t)  # 0
 
 
+# -------------------------Search for Books-------------------------- #
 
 
+@app.route('/search_books', methods=['POST', 'GET'])
+def search_books():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print(data)
 
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.search_books(data['keyword'], data['type'])
+
+    the_book_info["data"] = data
+    return jsonify(the_book_info)  # json
 
 
 # -------------------------THE END-------------------------- #
