@@ -165,9 +165,13 @@ def get_books(username):
     book_detail = cursor.fetchmany(20)  # get many record
     t = []
     for one_book in book_detail:
+        sql = "select name from book_category where cate_id='%s'" % (one_book[7])   # category id -> category name
+        cursor.execute(sql)
+        cate = cursor.fetchone()
+
         slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
                  'press': one_book[3], 'publish_date': one_book[4],
-                 'author': one_book[5], 'price': one_book[6], 'category': one_book[7]}  # prepare json data
+                 'author': one_book[5], 'price': one_book[6], 'category': cate[0]}  # prepare json data
         t.append(slice)
 
     cursor.close()  # close
@@ -177,14 +181,19 @@ def get_books(username):
 def get_book_detail(book_id):
     cursor = con.cursor()  # initiate
     sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
-          " from book_info "
+          " from book_info where book_id='%s'" % (book_id)
     cursor.execute(sql)
     book_detail = cursor.fetchone()  # get one record
-    print(book_detail)
+    # print(book_detail)
     t = []
+
+    sql = "select name from book_category where cate_id='%s'" % (book_detail[7])   # category id -> category name
+    cursor.execute(sql)
+    cate = cursor.fetchone()
+
     slice = {'book_id': book_detail[0], 'name': book_detail[1], 'image_url': trim_url(book_detail[2]),
              'press': book_detail[3], 'publish_date': book_detail[4],
-             'author': book_detail[5], 'price': book_detail[6], 'category': book_detail[7]}  # prepare json data
+             'author': book_detail[5], 'price': book_detail[6], 'category': cate[0]}  # prepare json data
     t.append(slice)
     print(t)
 
@@ -245,18 +254,20 @@ def get_cart(username):
     t = []
     for one_book in cart_books:
         book_id = one_book[0]
-        print("book id: ")
-        print(book_id)
         number = one_book[1]
-        print("total number: ")
-        print(number)
+
         sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
-              " from book_info "
+              " from book_info where book_id='%s'" % (book_id)
         cursor.execute(sql)
         book_detail = cursor.fetchone()
-        slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
-                 'press': one_book[3], 'publish_date': one_book[4],
-                 'author': one_book[5], 'price': one_book[6], 'category': one_book[7],
+
+        sql = "select name from book_category where cate_id='%s'" % (book_detail[7])   # category id -> category name
+        cursor.execute(sql)
+        cate = cursor.fetchone()
+
+        slice = {'book_id': book_detail[0], 'name': book_detail[1], 'image_url': trim_url(book_detail[2]),
+                 'press': book_detail[3], 'publish_date': book_detail[4],
+                 'author': book_detail[5], 'price': book_detail[6], 'category': cate[0],
                  'number': number}  # prepare json data
         t.append(slice)
         print(t)
@@ -412,6 +423,7 @@ def get_user_orders(username):
     cursor.execute(sql)
     user_orders = cursor.fetchall()
     t = []
+
     for one_order in user_orders:
         slice = {'order_id': one_order[0], 'user_id': one_order[1], 'payment': one_order[2],
                  'payment_type': one_order[3], 'status': one_order[4]}  # prepare json data
@@ -429,18 +441,23 @@ def get_order_detail(order_id):
     cursor.execute(sql)
     order_books = cursor.fetchall()
     t = []
-    total_price = decimal.Decimal(0.00)  # total price for the specific book
     for one_book in order_books:
         book_id = one_book[0]
         mount = one_book[1]
         sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
-              " from book_info "
+              " from book_info where book_id='%s'" % (book_id)
         cursor.execute(sql)
         book_detail = cursor.fetchone()
-        total_price = book_detail[9] * mount  # total price for the specific book
+
+        total_price = book_detail[6] * mount  # total price for the specific book
+
+        sql = "select name from book_category where cate_id='%s'" % (book_detail[7])   # category id -> category name
+        cursor.execute(sql)
+        cate = cursor.fetchone()
+
         slice = {'book_id': book_detail[0], 'name': book_detail[1], 'image_url': trim_url(book_detail[2]),
                  'press': book_detail[3], 'publish_date': book_detail[4],
-                 'author': book_detail[5], 'price': book_detail[6], 'category': book_detail[7],
+                 'author': book_detail[5], 'price': book_detail[6], 'category': cate[0],
                  'mount': mount,
                  'book_total_price': total_price}  # prepare json data
         t.append(slice)
@@ -477,10 +494,15 @@ def admin_get_all_books():
     cursor.execute(sql)
     book_detail = cursor.fetchmany(20)  # get many record
     t = []
+
     for one_book in book_detail:
+        sql = "select name from book_category where cate_id='%s'" % (one_book[7])   # category id -> category name
+        cursor.execute(sql)
+        cate = cursor.fetchone()
+
         slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
                  'press': one_book[3], 'publish_date': one_book[4],
-                 'author': one_book[5], 'price': one_book[6], 'category': one_book[7]}  # prepare json data
+                 'author': one_book[5], 'price': one_book[6], 'category': cate[0]}  # prepare json data
         t.append(slice)
 
     cursor.close()  # close
@@ -515,16 +537,38 @@ def get_books_tops():
     book_detail = cursor.fetchmany(20)  # get many record
     t = []
     for one_book in book_detail:
+        sql = "select name from book_category where cate_id='%s'" % (one_book[7])   # category id -> category name
+        cursor.execute(sql)
+        cate = cursor.fetchone()
+
         slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
                  'press': one_book[3], 'publish_date': one_book[4],
-                 'author': one_book[5], 'price': one_book[6], 'category': one_book[7]}  # prepare json data
+                 'author': one_book[5], 'price': one_book[6], 'category': cate[0]}  # prepare json data
         t.append(slice)
 
     cursor.close()  # close
     return t
 
 
+def get_books_for_user():
+    cursor = con.cursor()  # initiate
+    sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
+          " from book_info where size is not null"
+    cursor.execute(sql)
+    book_detail = cursor.fetchmany(20)  # get many record
+    t = []
+    for one_book in book_detail:
+        sql = "select name from book_category where cate_id='%s'" % (one_book[7])   # category id -> category name
+        cursor.execute(sql)
+        cate = cursor.fetchone()
 
+        slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
+                 'press': one_book[3], 'publish_date': one_book[4],
+                 'author': one_book[5], 'price': one_book[6], 'category': cate[0]}  # prepare json data
+        t.append(slice)
+
+    cursor.close()  # close
+    return t
 
 
 

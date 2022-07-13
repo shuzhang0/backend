@@ -330,6 +330,20 @@ def get_books_tops():
     return jsonify(the_book_info)  # json
 
 
+@app.route('/get_books_for_user', methods=['POST', 'GET'])
+def get_books_for_user():
+    data = json.loads(request.get_data(as_text=True))  # get json data
+    print(data)
+
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.get_books_for_user(data['username'])
+
+    the_book_info["data"] = data
+    return jsonify(the_book_info)  # json
 
 
 
