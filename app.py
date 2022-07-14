@@ -354,6 +354,27 @@ def get_books_for_user():
 # -------------------------Website Management-------------------------- #
 
 
+@app.route('/admin/get_satistics', methods=['POST', 'GET'])
+def get_satistics():
+    # data = json.loads(request.get_data(as_text=True))  # get json data
+
+    the_info = {  # prepare to send
+        'code': 200,
+        'orders': [],
+        'urls': [],
+        'locations': []
+    }
+
+    orders = sql.get_orders_sum()
+    urls = sql.get_urls_sum()
+    locations = sql.get_locations_sum()
+
+    the_info["orders"] = orders
+    the_info["urls"] = urls
+    the_info["locations"] = locations
+    return jsonify(the_info)  # json
+
+
 @app.route('/admin/get_orders_sum', methods=['POST', 'GET'])
 def get_orders_sum():
     # data = json.loads(request.get_data(as_text=True))  # get json data
@@ -369,8 +390,8 @@ def get_orders_sum():
     return jsonify(the_book_info)  # json
 
 
-@app.route('/admin/get_url_sum', methods=['POST', 'GET'])
-def get_url_sum():
+@app.route('/admin/get_urls_sum', methods=['POST', 'GET'])
+def get_urls_sum():
     # data = json.loads(request.get_data(as_text=True))  # get json data
 
     the_book_info = {  # prepare to send
@@ -378,14 +399,14 @@ def get_url_sum():
         'data': []
     }
 
-    data = sql.get_url_sum()
+    data = sql.get_urls_sum()
 
     the_book_info["data"] = data
     return jsonify(the_book_info)  # json
 
 
-@app.route('/admin/get_location_sum', methods=['POST', 'GET'])
-def get_location_sum():
+@app.route('/admin/get_locations_sum', methods=['POST', 'GET'])
+def get_locations_sum():
     # data = json.loads(request.get_data(as_text=True))  # get json data
 
     the_book_info = {  # prepare to send
@@ -393,7 +414,7 @@ def get_location_sum():
         'data': []
     }
 
-    data = sql.get_location_sum()
+    data = sql.get_locations_sum()
 
     the_book_info["data"] = data
     return jsonify(the_book_info)  # json

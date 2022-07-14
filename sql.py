@@ -644,51 +644,54 @@ def get_orders_sum():
     con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
+    sql = "select month, num from num_orders"
+    cursor.execute(sql)
+    all_records = cursor.fetchall()
     t = []
-    slice = {'month': 4, 'sum':630}  # prepare json data
-    t.append(slice)
-    slice = {'month': 5, 'sum':695}  # prepare json data
-    t.append(slice)
-    slice = {'month': 6, 'sum':675}  # prepare json data
-    t.append(slice)
+    for one_record in all_records:
+        slice = {'month': one_record[0], 'sum': one_record[1]}  # prepare json data
+        t.append(slice)
 
     cursor.close()  # close
     con.close()
     return t
 
 
-def get_url_sum():
+def get_urls_sum():
     con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
+    sql = "select url, times from urlAddress"
+    cursor.execute(sql)
+    all_records = cursor.fetchmany(50)
     t = []
-    slice = {'month': 4, 'sum':630}  # prepare json data
-    t.append(slice)
-    slice = {'month': 5, 'sum':695}  # prepare json data
-    t.append(slice)
-    slice = {'month': 6, 'sum':675}  # prepare json data
-    t.append(slice)
+    for one_record in all_records:
+        slice = {'url': one_record[0], 'times': one_record[1]}  # prepare json data
+        t.append(slice)
+
 
     cursor.close()  # close
     con.close()
     return t
 
 
-def get_location_sum():
+def get_locations_sum():
     con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
+    sql = "select user_id, ip, times, address from ipAddress"
+    cursor.execute(sql)
+    all_records = cursor.fetchmany(50)
     t = []
-    slice = {'month': 4, 'sum':630}  # prepare json data
-    t.append(slice)
-    slice = {'month': 5, 'sum':695}  # prepare json data
-    t.append(slice)
-    slice = {'month': 6, 'sum':675}  # prepare json data
-    t.append(slice)
+    for one_record in all_records:
+        slice = {'user_id': one_record[0], 'ip': one_record[1],
+                 'times': one_record[2], 'address': one_record[3]}  # prepare json data
+        t.append(slice)
 
     cursor.close()  # close
     con.close()
     return t
+
 
 # -------------------------Addition for Admin-------------------------- #
 
