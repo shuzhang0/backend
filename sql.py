@@ -9,13 +9,22 @@ from flask_cors import CORS  # 解决跨域的问题
 import pymysql
 
 # 配置数据库
-con = pymysql.connect(
-    host='47.101.69.44',
-    user='root',
-    password='123456',
-    db='testsql',
-    charset='utf8'
-)
+config = {
+    'host': '47.101.69.44',
+    'port': 3306,
+    'user': 'root',
+    'password': '123456',
+    'db': 'testsql',
+    'charset': 'utf8'
+}
+
+# con = pymysql.connect(
+#     host='47.101.69.44',
+#     user='root',
+#     password='123456',
+#     db='testsql',
+#     charset='utf8'
+# )
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -27,6 +36,7 @@ CORS(app, supports_credentials=True)
 @app.route('/')
 def sql_use():
     # 游标
+    con = pymysql.connect(**config)
     cursor = con.cursor()
 
     # 查询全部
@@ -82,6 +92,7 @@ def trim_url(url):
 
 
 def login(username, password):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     sql = "select username, password from user"
     cursor.execute(sql)
@@ -91,16 +102,20 @@ def login(username, password):
         if name == username:
             if pwd == password:
                 cursor.close()  # close
+                con.close()
                 return 0  # user match
             else:
                 cursor.close()  # close
+                con.close()
                 return 1  # user not right pwd
 
     cursor.close()  # close
+    con.close()
     return -1  # user not exist
 
 
 def regist(username, password, role):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     sql = "select username from user"
     cursor.execute(sql)
@@ -110,6 +125,7 @@ def regist(username, password, role):
         if name == username:
             print('already exists')
             cursor.close()  # close
+            con.close()
             return -1
 
     sql = 'insert into user(username, password)values("%s","%s")' % (username, password)
@@ -120,10 +136,12 @@ def regist(username, password, role):
     con.commit()  # 提交至数据库
 
     cursor.close()  # close
+    con.close()
     return 0
 
 
 def get_user_status(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     sql = "select role_id from user_role where user_id='%d'" % user_id
@@ -133,6 +151,7 @@ def get_user_status(username):
 
     t = {'user_id': user_id, 'username': username, 'role': user_role}
     cursor.close()  # close
+    con.close()
     return t
 
 
@@ -140,6 +159,7 @@ def get_user_status(username):
 
 
 def username_to_id(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     sql = "select user_id from user where username='%s'" % (username)
     cursor.execute(sql)
@@ -150,6 +170,7 @@ def username_to_id(username):
     print("id now...")
 
     cursor.close()  # close
+    con.close()
     return id
 
 
@@ -157,6 +178,7 @@ def username_to_id(username):
 
 
 def get_books(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     # user_id = username_to_id(username)
     sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
@@ -175,10 +197,12 @@ def get_books(username):
         t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def get_book_detail(book_id):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
           " from book_info where book_id='%s'" % (book_id)
@@ -198,10 +222,12 @@ def get_book_detail(book_id):
     print(t)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def add_book_rating(username, book_id, rating):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -217,10 +243,12 @@ def add_book_rating(username, book_id, rating):
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
 def get_book_ratings(book_id):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     sql = "select user_id, score from book_ratings where book_id='%d'" % (book_id)
     cursor.execute(sql)
@@ -238,6 +266,7 @@ def get_book_ratings(book_id):
 
     print(t)
     cursor.close()  # close
+    con.close()
     return t
 
 
@@ -245,6 +274,7 @@ def get_book_ratings(book_id):
 
 
 def get_cart(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -273,10 +303,12 @@ def get_cart(username):
         print(t)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def add_cart(username, book_id):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -292,10 +324,12 @@ def add_cart(username, book_id):
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
 def minus_cart(username, book_id):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -314,10 +348,12 @@ def minus_cart(username, book_id):
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
 def del_cart(username, book_id):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -328,10 +364,13 @@ def del_cart(username, book_id):
         sql = "delete from book_cart where user_id='%d' and book_id='%d'" % (user_id, book_id)
         cursor.execute(sql)
     else:
+        cursor.close()  # close
+        con.close()
         return -1
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
@@ -339,6 +378,7 @@ def del_cart(username, book_id):
 
 
 def clear_cart(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -352,10 +392,12 @@ def clear_cart(username):
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
 def get_cart_price(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     sql = "select book_id, number from book_cart where user_id='%d'" % (user_id)
@@ -376,6 +418,7 @@ def get_cart_price(username):
 
     print(total_price)
     cursor.close()  # close
+    con.close()
     return total_price
 
 
@@ -383,6 +426,7 @@ def get_cart_price(username):
 
 
 def add_order(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -412,10 +456,12 @@ def add_order(username):
     t = {'order_id': order_id, 'user_id': user_id, 'payment': order_price, 'status': 0}
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return t
 
 
 def get_user_orders(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -431,10 +477,12 @@ def get_user_orders(username):
         print(t)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def get_order_detail(order_id):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
     sql = "select book_id, mount from order_detail where order_id='%s'" % (order_id)
@@ -464,6 +512,7 @@ def get_order_detail(order_id):
         print(t)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
@@ -471,6 +520,7 @@ def get_order_detail(order_id):
 
 
 def admin_get_all_users():
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
     sql = "select user.user_id, username, nickname, password, gender, email, phone, user_role.role_id " \
@@ -485,10 +535,12 @@ def admin_get_all_users():
         t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def admin_get_all_books():
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
     sql = sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
@@ -508,10 +560,12 @@ def admin_get_all_books():
         t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def admin_get_all_orders():
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
     sql = "select order_id, user_id, payment, payment_type, status, post_fee" \
@@ -525,6 +579,7 @@ def admin_get_all_orders():
         t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
@@ -532,6 +587,7 @@ def admin_get_all_orders():
 
 
 def get_books_tops():
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
           " from book_info where size is not null"
@@ -549,10 +605,12 @@ def get_books_tops():
         t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
 
 def get_books_for_user(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     sql = "select book_id from customized where user_id ='%d'" % (user_id)
@@ -575,6 +633,7 @@ def get_books_for_user(username):
                 count = count + 1
 
     cursor.close()  # close
+    con.close()
     return t
 
 
@@ -582,6 +641,7 @@ def get_books_for_user(username):
 
 
 def get_orders_sum():
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
 
     t = []
@@ -593,13 +653,48 @@ def get_orders_sum():
     t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
+
+def get_url_sum():
+    con = pymysql.connect(**config)
+    cursor = con.cursor()  # initiate
+
+    t = []
+    slice = {'month': 4, 'sum':630}  # prepare json data
+    t.append(slice)
+    slice = {'month': 5, 'sum':695}  # prepare json data
+    t.append(slice)
+    slice = {'month': 6, 'sum':675}  # prepare json data
+    t.append(slice)
+
+    cursor.close()  # close
+    con.close()
+    return t
+
+
+def get_location_sum():
+    con = pymysql.connect(**config)
+    cursor = con.cursor()  # initiate
+
+    t = []
+    slice = {'month': 4, 'sum':630}  # prepare json data
+    t.append(slice)
+    slice = {'month': 5, 'sum':695}  # prepare json data
+    t.append(slice)
+    slice = {'month': 6, 'sum':675}  # prepare json data
+    t.append(slice)
+
+    cursor.close()  # close
+    con.close()
+    return t
 
 # -------------------------Addition for Admin-------------------------- #
 
 
 def modify_user(username, password, nickname, gender, email, phone):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
 
@@ -615,10 +710,12 @@ def modify_user(username, password, nickname, gender, email, phone):
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
 def del_user(username):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
     print(user_id)
@@ -630,6 +727,7 @@ def del_user(username):
 
     con.commit()  # 提交至数据库
     cursor.close()  # close
+    con.close()
     return 0
 
 
@@ -637,6 +735,7 @@ def del_user(username):
 
 
 def search_books(keyword, search_type):
+    con = pymysql.connect(**config)
     cursor = con.cursor()  # initiate
     like_key = "%" + keyword + "%"
     print(like_key)
@@ -671,6 +770,7 @@ def search_books(keyword, search_type):
             t.append(slice)
 
     cursor.close()  # close
+    con.close()
     return t
 
 

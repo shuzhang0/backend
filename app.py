@@ -369,6 +369,36 @@ def get_orders_sum():
     return jsonify(the_book_info)  # json
 
 
+@app.route('/admin/get_url_sum', methods=['POST', 'GET'])
+def get_url_sum():
+    # data = json.loads(request.get_data(as_text=True))  # get json data
+
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.get_url_sum()
+
+    the_book_info["data"] = data
+    return jsonify(the_book_info)  # json
+
+
+@app.route('/admin/get_location_sum', methods=['POST', 'GET'])
+def get_location_sum():
+    # data = json.loads(request.get_data(as_text=True))  # get json data
+
+    the_book_info = {  # prepare to send
+        'code': 200,
+        'data': []
+    }
+
+    data = sql.get_location_sum()
+
+    the_book_info["data"] = data
+    return jsonify(the_book_info)  # json
+
+
 # -------------------------Addition for Admin-------------------------- #
 
 
