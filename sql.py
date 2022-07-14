@@ -555,20 +555,24 @@ def get_books_tops():
 def get_books_for_user(username):
     cursor = con.cursor()  # initiate
     user_id = username_to_id(username)
-    sql = "select book_id, name, image_url, press, publish_date, author, price, book_category_id" \
-          " from xxxxx where user_id ='%d'" % (user_id)
+    sql = "select book_id from customized where user_id ='%d'" % (user_id)
     cursor.execute(sql)
-    book_detail = cursor.fetchmany(20)  # get many record
+    cus_books = cursor.fetchall()  # get many record
     t = []
-    for one_book in book_detail:
-        sql = "select name from book_category where cate_id='%s'" % (one_book[7])   # category id -> category name
-        cursor.execute(sql)
-        cate = cursor.fetchone()
-
-        slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
-                 'press': one_book[3], 'publish_date': one_book[4],
-                 'author': one_book[5], 'price': one_book[6], 'category': cate[0]}  # prepare json data
-        t.append(slice)
+    count = 0
+    for each_book in cus_books:
+        if count < 20:     # get valid 20 books
+            sql = "select book_id, book_info.name, image_url, press, publish_date, author, price, book_category.name " \
+                  "from book_info inner join book_category on book_info.book_category_id=book_category.cate_id " \
+                  "where book_info.book_id='%s'" % each_book[0]
+            cursor.execute(sql)
+            one_book = cursor.fetchone()
+            if one_book is not None:
+                slice = {'book_id': one_book[0], 'name': one_book[1], 'image_url': trim_url(one_book[2]),
+                         'press': one_book[3], 'publish_date': one_book[4],
+                         'author': one_book[5], 'price': one_book[6], 'category': one_book[7]}  # prepare json data
+                t.append(slice)
+                count = count + 1
 
     cursor.close()  # close
     return t

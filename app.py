@@ -86,12 +86,18 @@ def get_books():
 
     the_book_info = {  # prepare to send
         'code': 200,
-        'data': []
+        'all_books': [],
+        'tops_books':[],
+        'cus_books':[]
     }
 
-    data = sql.get_books(data['username'])
+    all_books = sql.get_books(data['username'])
+    tops_books = sql.get_books_tops()
+    cus_books = sql.get_books_for_user(data['username'])
 
-    the_book_info["data"] = data
+    the_book_info["all_books"] = all_books
+    the_book_info["tops_books"] = tops_books
+    the_book_info["cus_books"] = cus_books
     return jsonify(the_book_info)  # json
 
 
