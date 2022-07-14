@@ -316,8 +316,7 @@ def admin_get_orders():
 
 @app.route('/get_books_tops', methods=['POST', 'GET'])
 def get_books_tops():
-    data = json.loads(request.get_data(as_text=True))  # get json data
-    print(data)
+    #data = json.loads(request.get_data(as_text=True))  # get json data
 
     the_book_info = {  # prepare to send
         'code': 200,
@@ -351,8 +350,7 @@ def get_books_for_user():
 
 @app.route('/admin/get_orders_sum', methods=['POST', 'GET'])
 def get_orders_sum():
-    data = json.loads(request.get_data(as_text=True))  # get json data
-    print(data)
+    # data = json.loads(request.get_data(as_text=True))  # get json data
 
     the_book_info = {  # prepare to send
         'code': 200,
